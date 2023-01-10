@@ -1,6 +1,6 @@
 specVersion: "1.0.0"
 
-name: "ethereum-subql-starter"
+name: "uniswap-v3"
 version: "0.0.1"
 runner:
   node:
@@ -16,38 +16,52 @@ schema:
   file: "./schema.graphql"
 
 network:
-  # This endpoint must be a public non-pruned archive node
-  # Public nodes may be rate limited, which can affect indexing speed
-  # When developing your project we suggest getting a private API key
-  # You can get them from OnFinality for free https://app.onfinality.io
-  # https://documentation.onfinality.io/support/the-enhanced-api-service
-  endpoint: https://eth.api.onfinality.io/public
+  endpoint: "https://eth.api.onfinality.io/public"
   chainId: "1"
+  dictionary: "https://eth-dict.api.onfinality.io/"
 
 dataSources:
   - kind: ethereum/Runtime
-    startBlock: 15695385
+    startBlock: 12369621
     options:
       # Must be a key of assets
-      abi: erc20
-      address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+      abi: Factory
+      address: "0x1F98431c8aD98523631AE4a59f267346ea31F984"
     assets:
-      erc20:
-        file: "erc20.abi.json"
+      Factory:
+        file: "./abis/Factory.json"
+      ERC20:
+        file: "./abis/ERC20.json"
+      ERC20SymbolBytes:
+        file: "./abis/ERC20SymbolBytes.json"
+      ERC20NameBytes:
+        file: "./abis/ERC20NameBytes.json"
+      Pool:
+        file: "./abis/pool.json"
     mapping:
       file: "./dist/index.js"
       handlers:
-        - handler: handleTransaction
-          kind: ethereum/TransactionHandler
+        - handler: handlePoolCreated
+          kind: ethereum/LogHandler
           filter:
-            ## The function can either be the function fragment or signature
-            # function: '0x095ea7b3'
-            # function: '0x7ff36ab500000000000000000000000000000000000000000000000000000000'
-            function: approve(address spender, uint256 rawAmount)
-        - handler: handleLog
+            address: "0x1F98431c8aD98523631AE4a59f267346ea31F984"
+            topics:
+              - PoolCreated(address indexed token0, address indexed token1, uint24 indexed fee, int24 tickSpacing, address pool)
+templates:
+  - name: Pool
+    kind: ethereum/Runtime
+    assets:
+      Pool:
+        file: "./abis/pool.json"
+      Factory:
+        file: "./abis/factory.json"
+      ERC20:
+        file: "./abis/ERC20.json"
+    mapping:
+      file: "./dist/index.js"
+      handlers:
+        - handler: handleInitialize
           kind: ethereum/LogHandler
           filter:
             topics:
-              ## Follows standard log filters https://docs.ethers.io/v5/concepts/events/
-              - Transfer(address indexed from, address indexed to, uint256 amount)
-              # address: "0x60781C2586D68229fde47564546784ab3fACA982"
+              - Initialize (uint160 sqrtPriceX96, int24 tick)

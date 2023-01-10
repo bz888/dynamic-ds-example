@@ -2,24 +2,46 @@
 # Add the `@index` or `@index(unique: true)` annotation after any non-key field
 # https://academy.subquery.network/build/graphql.html#indexing-by-non-primary-key-field
 
-type Transaction @entity {
-  id: ID! # Transaction hash
-  value: BigInt!
+type Factory @entity {
+  # factory address
+  id: ID!
+  # amount of pools created
+  poolCount: BigInt!
+  # amoutn of transactions all time
+  txCount: BigInt!
+  # total volume all time in derived USD
+  totalVolumeUSD: Float!
+  # total volume all time in derived ETH
+  totalVolumeETH: Float!
+  # total swap fees all time in USD
+  totalFeesUSD: Float!
+  # total swap fees all time in USD
+  totalFeesETH: Float!
+  # all volume even through less reliable USD values
+  untrackedVolumeUSD: Float!
+  # TVL derived in USD
+  totalValueLockedUSD: Float!
+  # TVL derived in ETH
+  totalValueLockedETH: Float!
+  # TVL derived in USD untracked
+  totalValueLockedUSDUntracked: Float!
+  # TVL derived in ETH untracked
+  totalValueLockedETHUntracked: Float!
 
-  to: String!
-
-  from: String!
-
-  contractAddress: String!
+  # current owner of the factory
+  owner: ID!
 }
 
-type Approval @entity {
-  id: ID! # Transaction hash
-  value: BigInt!
 
-  owner: String!
-
-  spender: String!
-
-  contractAddress: String!
+type Token @entity {
+  id: ID!   # token address
+  name: String!
 }
+
+type Pool @entity {
+  id: ID! # pool address
+  updatingValue: Int
+  token0: Token
+  token1: Token
+}
+
